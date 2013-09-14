@@ -4,13 +4,13 @@ CS Club Password Reset Page
 Forgot Your Password?
 -----------------------------------------
 
-The Computer Science Club registration page is a simple page where club members 
+The Computer Science Club Password Reset Page is a simple page where club members 
 can reset their club account password.
 
-If you are still having issues trying to reset your password (e.g. you
-don't remember the email you used, or you forgot your username) please 
+If you are still having issues trying to reset your password (e.g. you don't 
+remember the email you used, or you forgot your username) please 
 [contact us](mailto:admin@cs-club.ca) by email or meet us in person at a club
-and we will correct any issues that you have with your club account.
+meeting and we will correct any issues that you have with your club account.
 
 
 Copyright (Really Copyleft)
