@@ -49,3 +49,8 @@ form.well.form-horizontal {
     padding-bottom: 5px; 
     margin-bottom: 0px;
 }
+
+/* Bold the current username in the form so users can better see it */
+span#username {
+    font-weight: bold;
+}
