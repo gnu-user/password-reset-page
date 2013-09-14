@@ -25,6 +25,7 @@ require_once "inc/validate.php";
 session_start();
 
 $errors = array();
+
 $mysqli_conn = new mysqli("localhost", $db_user, $db_pass, $db_name);
 
 /* check connection */
@@ -54,9 +55,13 @@ if (isset($_GET['code']))
 }
 else
 {
-    array_push($errors, '<strong>No Reset Code Provided!</strong> You have not provided a reset code '.
-               'required to reset your password. If you are having issues resetting your password please ' .
-               'contact the <a target="_blank" href="mailto:admin@cs-club.ca">Club Executives</a>');
+    /* Don't display this error on page refresh after setting new password */
+    if (!isset($_SESSION['password_reset']))
+    {
+        array_push($errors, '<strong>No Reset Code Provided!</strong> You have not provided a reset code '.
+                   'required to reset your password. If you are having issues resetting your password please ' .
+                   'contact the <a target="_blank" href="mailto:admin@cs-club.ca">Club Executives</a>');
+    }
 }
 
 
@@ -75,6 +80,10 @@ include 'templates/newpassword_form.php';
 /* Include the footer */
 include 'templates/footer.php';
 
-/* Reset the session state */
-session_unset();
+/* close connection */
+$mysqli_conn->close();
+
+/* Unset errors and password reset status */
+unset($_SESSION['errors']);
+unset($_SESSION['password_reset']);
 ?>
