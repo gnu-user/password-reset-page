@@ -89,4 +89,19 @@ function valid_student_num($student_number)
     return FALSE;
 }
 
+/**
+ * Validate the password
+ * @package validate
+ *
+ * @param string $password the password post data
+ * @return boolean TRUE if the input for the password is valid
+ */
+function valid_password($password)
+{
+    if (preg_match('/^[a-zA-Z0-9\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\|\<\>\?]{6,31}$/', $password))
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
 ?>

@@ -210,7 +210,7 @@ function get_username($mysqli, $passcode)
 {
     $username = "";
 
-    /* Verify that the first name exists is not already in use */
+    /* Get the username */
     if ($stmt = $mysqli->prepare("SELECT 
                                       m.username 
                                   FROM 
@@ -241,6 +241,66 @@ function get_username($mysqli, $passcode)
 }
 
 
+/**
+ * Update the password for the user account
+ *
+ * @param mysqli $mysqli The mysqli connection object
+ * @param string $passcode The passcode required to reset the password
+ * @param string $password The new password
+ *
+ * @return string The username number of the club member
+ */
+function update_password($mysqli, $passcode, $password, $AES_KEY)
+{
+    $access_account = "";
+
+    /* Get the access account */
+    if ($stmt = $mysqli->prepare("SELECT 
+                                      m.access_account 
+                                  FROM 
+                                      passcodes AS p INNER JOIN 
+                                      ucsc_members AS m 
+                                  ON 
+                                      p.access_account = m.access_account
+                                  WHERE 
+                                      passcode LIKE ?"))
+    {
+        /* bind parameters for markers */
+        $stmt->bind_param('s', $passcode);
+
+        /* execute query */
+        $stmt->execute();
+
+        /* bind result variables */
+        $stmt->bind_result($access_account);
+
+        /* fetch value */
+        $stmt->fetch();
+
+        /* close statement */
+        $stmt->close();
+    }
+
+    
+    /* Update the password for the user */
+    if ($stmt = $mysqli->prepare("UPDATE 
+                                      ucsc_members
+                                  SET
+                                      password = AES_ENCRYPT(?, ?)
+                                  WHERE
+                                      access_account = ?"))
+    {
+        /* bind parameters for markers */
+        $stmt->bind_param('ssi', $password, $AES_KEY, $access_account);
+
+        /* execute query */
+        $stmt->execute();
+
+        /* close statement */
+        $stmt->close();
+    }
+}
+
 
 /** 
  * A function which adds the generated password reset code to the database.
@@ -265,9 +325,6 @@ function add_passcode($mysqli, $passcode, $access_account)
         /* execute query */
         $stmt->execute();
 
-        /* fetch value */
-        $stmt->fetch();
-
         /* close statement */
         $stmt->close();
     }
@@ -290,7 +347,7 @@ function correct_passcode($mysqli, $passcode)
 
     /* Verify that the passphrase is unique and exists */
     if ($stmt = $mysqli->prepare("SELECT 
-                                      passcode 
+                                      1 
                                   FROM 
                                       passcodes 
                                   WHERE 
@@ -313,13 +370,13 @@ function correct_passcode($mysqli, $passcode)
         $stmt->close();
     }   
 
-    if (strcmp($passcode, $match) !== 0)
+    if ($match == 1)
     {
-        return false;
+        return true;
     }
     else
     {
-        return true;
+        return false;
     }
 }
 
