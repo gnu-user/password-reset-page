@@ -68,7 +68,7 @@ if (   isset($_POST['first_name']) && isset($_POST['last_name'])
     if (isset($data['first_name']) && isset($data['last_name']) && isset($data['student_number']) 
         && club_member_exists($mysqli_conn, $data['first_name'], $data['last_name'], $data['student_number'], $AES_KEY))
     {
-        /* Get the email of the club member */
+        /* Get the email */
         $data['email'] = get_member_email($mysqli_conn, $data['first_name'], $data['last_name'], 
                                           $data['student_number'], $AES_KEY);
 
@@ -94,12 +94,17 @@ if (   isset($_POST['first_name']) && isset($_POST['last_name'])
     /* If there are no errors email generate a reset password code and email it to them */
     if (empty($errors))
     {
-        echo "GREAT SUCCESS";
+        /* Get the access account of the club member, and generate a new password reset code */
+        $data['access_account'] = get_member_account($mysqli_conn, $data['first_name'], $data['last_name'], 
+                                                     $data['student_number'], $AES_KEY);
+        $passcode = generate_passcode();
+        add_passcode($mysqli_conn, $passcode, $data['access_account']);
+
         //update_passphrase($mysqli_conn, $data['passphrase']);
         //add_new_member($mysqli_conn, $data, $AES_KEY);
 
         /* Finally call a script to send the new club member a friendly
-         * "Welome to CS-CLUB" email with information about the club.
+         * "Welcome to CS-CLUB" email with information about the club.
          */
         //system( "scripts/welcome-email.sh " . $data['first_name'] . " " . $data['last_name'] . 
         //        " " . $data['email'] . " >/dev/null &",$retval);
@@ -124,6 +129,6 @@ else
 }
 
 /* close connection */
-$mysqli->close();
+$mysqli_conn->close();
 exit();
 ?>
