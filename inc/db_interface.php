@@ -198,6 +198,50 @@ function get_member_account($mysqli, $first_name, $last_name, $student_id, $AES_
 }
 
 
+/**
+ * Gets the username of the account that is having the password reset
+ *
+ * @param mysqli $mysqli The mysqli connection object
+ * @param string $passcode The password reset code
+ *
+ * @return string The username number of the club member
+ */
+function get_username($mysqli, $passcode)
+{
+    $username = "";
+
+    /* Verify that the first name exists is not already in use */
+    if ($stmt = $mysqli->prepare("SELECT 
+                                      m.username 
+                                  FROM 
+                                      passcodes AS p INNER JOIN 
+                                      ucsc_members AS m 
+                                  ON 
+                                      p.access_account = m.access_account
+                                  WHERE 
+                                      passcode LIKE ?"))
+    {
+        /* bind parameters for markers */
+        $stmt->bind_param('s', $passcode);
+
+        /* execute query */
+        $stmt->execute();
+
+        /* bind result variables */
+        $stmt->bind_result($username);
+
+        /* fetch value */
+        $stmt->fetch();
+
+        /* close statement */
+        $stmt->close();
+    }
+
+    return $username;
+}
+
+
+
 /** 
  * A function which adds the generated password reset code to the database.
  * @package dbinterface
