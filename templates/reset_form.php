@@ -59,7 +59,8 @@
                             <button type="button" class="close" data-dismiss="alert">&times;</button>
                             <p>
                                 <strong>An Email With Reset Instructions Has Been Sent!</strong> An email has been
-                                sent to the email address you used to register as a member of the club. 
+                                sent to the email address you used to register as a member of the club with
+                                instructions on resetting your password.
                             </p>
                             <p>
                                 If you did not recieve an email with reset instructions, or for some other reason 
@@ -109,7 +110,7 @@
                     <!-- Reset Password -->
                     <div class="control-group">
                         <div class="controls">
-                            <button type="reset" id="reset" name="reset" class="btn btn-inverse">Reset</button>
+                            <button type="submit" id="reset" name="reset" class="btn btn-inverse">Reset</button>
                         </div>
                     </div>
                 </fieldset>
