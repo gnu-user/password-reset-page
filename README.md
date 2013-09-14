@@ -1,7 +1,7 @@
-Computer Science Club Password Reset Page
+CS Club Password Reset Page
 =========================================
 
-Forgot Your Password
+Forgot Your Password?
 -----------------------------------------
 
 The Computer Science Club registration page is a simple page where club members 
