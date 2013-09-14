@@ -21,7 +21,7 @@
 
 session_start();
 
- /* Display the template for registration */
+ /* Display the template for password reset */
 include 'templates/header.php';
 
 include 'templates/reset_form.php';
