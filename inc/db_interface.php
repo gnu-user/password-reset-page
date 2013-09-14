@@ -46,6 +46,15 @@ function salt_sensitive_data(&$data)
 }
 
 
+/** 
+ * A function which generates a random password reset code
+ *
+ */
+function generate_passcode() 
+{         
+    return sha1(mt_rand() . mt_rand());
+}
+
 /**
  * Check if the club member is in the database.
  *
@@ -144,25 +153,108 @@ function get_member_email($mysqli, $first_name, $last_name, $student_id, $AES_KE
 }
 
 
+/**
+ * Gets the access accout number of the club member
+ *
+ * @param mysqli $mysqli The mysqli connection object
+ * @param first_name The first name of the club member
+ * @param last_name The last name of the club member
+ * @param student_id The member's student id
+ * @param string $AES_KEY The AES encrypt/decrypt key for the password
+ *
+ * @return string The access account number of the club member
+ */
+function get_member_account($mysqli, $first_name, $last_name, $student_id, $AES_KEY)
+{
+    $access_account = "";
+
+    /* Verify that the first name exists is not already in use */
+    if ($stmt = $mysqli->prepare("SELECT 
+                                      access_account 
+                                  FROM 
+                                      ucsc_members 
+                                  WHERE 
+                                      first_name LIKE ? AND 
+                                      last_name LIKE ? AND
+                                      SUBSTRING(AES_DECRYPT(student_id, ?), 9) LIKE ?"))
+    {
+        /* bind parameters for markers */
+        $stmt->bind_param('ssss', $first_name, $last_name, $AES_KEY, $student_id);
+
+        /* execute query */
+        $stmt->execute();
+
+        /* bind result variables */
+        $stmt->bind_result($access_account);
+
+        /* fetch value */
+        $stmt->fetch();
+
+        /* close statement */
+        $stmt->close();
+    }
+
+    return $access_account;
+}
+
+
 /** 
- * A function which verifies that the passphrase has not already been used and is a valid
- * passphrase that was given to the individual by an executive of the club.
+ * A function which adds the generated password reset code to the database.
  * @package dbinterface
  *
  * @param mysqli $mysqli The mysqli connection object
- * @param string $passphrase The passphrase to validate
+ * @param string $passcode The password reset code
  *
  * @return boolean True if the passphrase is valid and has not already been used
  */
-function correct_passphrase($mysqli, $passphrase)
+function add_passcode($mysqli, $passcode, $access_account)
+{
+    /* Add the passcode to the database */
+    if ($stmt = $mysqli->prepare("INSERT INTO 
+                                      passcodes
+                                  VALUES
+                                      (?, CURDATE(), NULL, ?)"))
+    {
+        /* bind parameters for markers */
+        $stmt->bind_param('ss', $passcode, $access_account);
+
+        /* execute query */
+        $stmt->execute();
+
+        /* fetch value */
+        $stmt->fetch();
+
+        /* close statement */
+        $stmt->close();
+    }
+}
+
+
+/** 
+ * A function which verifies that the password reset code has not already been used and is
+ * valid.
+ * @package dbinterface
+ *
+ * @param mysqli $mysqli The mysqli connection object
+ * @param string $passcode The password reset code
+ *
+ * @return boolean True if the passphrase is valid and has not already been used
+ */
+function correct_passcode($mysqli, $passcode)
 {
     $match = "";
 
     /* Verify that the passphrase is unique and exists */
-    if ($stmt = $mysqli->prepare("SELECT passphrase FROM passphrases WHERE passphrase LIKE ? AND date_used IS NULL"))
+    if ($stmt = $mysqli->prepare("SELECT 
+                                      passcode 
+                                  FROM 
+                                      passcodes 
+                                  WHERE 
+                                      passcode LIKE ? AND 
+                                      date_used IS NULL"))
     {
         /* bind parameters for markers */
-        $stmt->bind_param('s', $passphrase);
+        $stmt->bind_param('s', $passcode);
 
         /* execute query */
         $stmt->execute();
@@ -177,7 +269,7 @@ function correct_passphrase($mysqli, $passphrase)
         $stmt->close();
     }   
 
-    if (strcmp($passphrase, $match) !== 0)
+    if (strcmp($passcode, $match) !== 0)
     {
         return false;
     }
@@ -187,40 +279,6 @@ function correct_passphrase($mysqli, $passphrase)
     }
 }
 
-/**
- * A function which adds a new club member to the database.
- * @package dbinterface
- *
- * @param mysqli $mysqli The mysqli connection object
- * @param array $data A dictionary mapping each required attribute of the new registered
- * member to the corresponding value. The keys used should be the same as in original $_POST
- * @param string $AES_KEY The AES encrypt/decrypt key for the password
- */
-function add_new_member($mysqli, $data, $AES_KEY)
-{
-    /* Add the new member into the database using a prepared statement */
-    if ($stmt = $mysqli->prepare("INSERT INTO ucsc_members VALUES (?, ?, AES_ENCRYPT(?, ?), ?, ?, AES_ENCRYPT(?, ?), NULL, CURDATE(), CURDATE(), 1)"))
-    {
-        /* bind parameters for markers */
-        $stmt->bind_param(
-                    'ssssssss', 
-                    $data['first_name'], 
-                    $data['last_name'], 
-                    $data['student_number'], 
-                    $AES_KEY, 
-                    $data['email'], 
-                    $data['username'], 
-                    $data['password'], 
-                    $AES_KEY
-        );
-
-        /* execute query */
-        $stmt->execute();
-
-        /* close statement */
-        $stmt->close();
-    }
-}
 
 /**
  * A function which updates the passphrase provided by the user to have the date_used field filled so 
@@ -230,13 +288,18 @@ function add_new_member($mysqli, $data, $AES_KEY)
  * @param mysqli $mysqli The mysqli connection object
  * @param string $passphrase The passphrase to update as used
  */
-function update_passphrase($mysqli, $passphrase)
+function update_passcode($mysqli, $passcode)
 {
     /* Set the passphrase date_used as current date */
-    if ($stmt = $mysqli->prepare("UPDATE passphrases SET date_used = CURDATE() WHERE passphrase LIKE ?"))
+    if ($stmt = $mysqli->prepare("UPDATE 
+                                      passcodes 
+                                  SET 
+                                      date_used = CURDATE() 
+                                  WHERE 
+                                      passcode LIKE ?"))
     {
         /* bind parameters for markers */
-        $stmt->bind_param('s', $passphrase);
+        $stmt->bind_param('s', $passcode);
 
         /* execute query */
         $stmt->execute();
