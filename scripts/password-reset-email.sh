@@ -27,7 +27,7 @@ EMAIL_MESSAGE="<html><body>
 password for your club account that you created when you registered as a member
 of the Computer Science Club.</p>
 
-<p><a href="https://cs-club.ca/reset/newpassword.php?code='"${PASSCODE}"'>Club Account Password Reset</a><br /></p>
+<p><a href="https://cs-club.ca/reset/newpassword.php?code='${PASSCODE}'">Club Account Password Reset</a><br /></p>
 
 <p>After you have reset your password you should immediately have access to any of the Computer Science Club services
 requiring login authentication.</p>
