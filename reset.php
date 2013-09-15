@@ -104,8 +104,8 @@ if (   isset($_POST['first_name']) && isset($_POST['last_name'])
 
 
         /* Send an email to the user with instructions on how to reset their password */
-        //system( "scripts/welcome-email.sh " . $data['first_name'] . " " . $data['last_name'] . 
-        //        " " . $data['email'] . " >/dev/null &",$retval);
+        system("scripts/password-reset-email.sh" . " \"" . $data['first_name'] "\" \"" . $data['last_name'] . 
+               "\" " . $data['passcode'] . " " . $data['email'] . " >/dev/null &", $retval);
 
         $_SESSION['email_sent'] = "email_sent";
         header('Location: index.php');
