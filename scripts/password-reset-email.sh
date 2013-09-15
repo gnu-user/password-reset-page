@@ -44,7 +44,7 @@ requiring login authentication.</p>
 # CS Club email account (uoit.csc@gmail.com)
 
 smtp-cli --server="${SMTP_SERVER}" --port="${SMTP_PORT}" --ssl --user="${CLUB_EMAIL}" \
---pass="${EMAIL_PASS}" --from="${CLUB_EMAIL}" --to="${NEW_MEMBER_EMAIL}" --subject="${EMAIL_SUBJECT}" \
+--pass="${EMAIL_PASS}" --from="${CLUB_EMAIL}" --to="${MEMBER_EMAIL}" --subject="${EMAIL_SUBJECT}" \
 --body-html="${EMAIL_MESSAGE}"
 
 exit $?
